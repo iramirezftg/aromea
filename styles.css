@@ -1893,6 +1893,16 @@ body.theme-light .accord-track {
   position: relative;
 }
 
+.mag-stage-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 14px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .mag-spread-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2878,6 +2888,43 @@ body.theme-light .bottom-nav-item.featured {
   }
   .mag-spread-container {
     grid-template-columns: 1fr;
+  }
+  .mag-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .mag-actions-group {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mag-actions-group .btn-primary,
+  .mag-actions-group .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .mag-flipbook-stage {
+    padding: 14px 12px;
+  }
+  .mag-controls-bar {
+    justify-content: center;
+    gap: 8px;
+  }
+  .mag-dots-row {
+    width: 100%;
+    justify-content: center;
+    order: -1;
+    margin-bottom: 4px;
+  }
+  .mag-page-dot {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+  .mag-shop-sidebar {
+    padding: 18px 14px;
   }
   .footer-inner {
     grid-template-columns: 1fr;

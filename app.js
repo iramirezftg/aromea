@@ -1516,8 +1516,278 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ==========================================================================
+   9. INTERACTIVE MAGAZINE FLIPBOOK & SHOP-THE-PAGE VIEWER
+   ========================================================================== */
+const MAGAZINE_PAGES = [
+  {
+    page: 1,
+    img: 'assets/img/mag-p1.png',
+    tag: 'Portada · Edición 2026',
+    title: 'The Olfactory Journal · Casa Aroméa',
+    desc: 'Bienvenida al universo sensorial de Aroméa: arquitectura olfativa para residencias de lujo y curaduría de alta perfumería en Guadalajara.',
+    scentTheme: 'condesa',
+    productIds: ['prod-condesa', 'prod-bundle-hotel']
+  },
+  {
+    page: 2,
+    img: 'assets/img/mag-p2.png',
+    tag: 'Página 02 · Línea Residencial',
+    title: 'Condesa & Imperial: Calma y Carácter',
+    desc: 'Dos firmas icónicas: la frescura floral blanca de Condesa y la presencia amaderada con cardamomo y oud de Imperial.',
+    scentTheme: 'imperial',
+    productIds: ['prod-condesa', 'prod-imperial']
+  },
+  {
+    page: 3,
+    img: 'assets/img/mag-p3.png',
+    tag: 'Página 03 · Línea Residencial',
+    title: 'Majestad & Oceanic: Realeza y Brisa Marina',
+    desc: 'Orquídea púrpura y vainilla nocturna en Majestad frente a la libertad mineral y cítrica de Oceanic.',
+    scentTheme: 'majestad',
+    productIds: ['prod-majestad', 'prod-oceanic']
+  },
+  {
+    page: 4,
+    img: 'assets/img/mag-p4.png',
+    tag: 'Página 04 · Oferta Estrella',
+    title: 'Bundle Hotel de Lujo ($799 MXN)',
+    desc: '2 Botellas de 1 Litro a tu elección + 1 Botella de 500 ml GRATIS (2.5 Litros totales) con envío gratis nacional.',
+    scentTheme: 'imperial',
+    productIds: ['prod-bundle-hotel', 'prod-discovery-gdl']
+  },
+  {
+    page: 5,
+    img: 'assets/img/mag-p5.png',
+    tag: 'Página 05 · @aromea.mx Guadalajara',
+    title: 'Alta Perfumería Dama & Árabe (Khamrah)',
+    desc: 'Originales 100% garantizados y decants: Khamrah de Lattafa, Mon Guerlain, My Way de Giorgio Armani y Burberry Her.',
+    scentTheme: 'condesa',
+    productIds: ['prod-khamrah', 'prod-monguerlain', 'prod-myway', 'prod-burberryher']
+  },
+  {
+    page: 6,
+    img: 'assets/img/mag-p6.png',
+    tag: 'Página 06 · Contraportada & Regalos',
+    title: 'Caballero, Cofres de Regalo & Directorio',
+    desc: 'Sets ejecutivos como Bad Boy de Carolina Herrera, Dúo Valentino & Prada Paradoxe y atención personalizada en GDL.',
+    scentTheme: 'oceanic',
+    productIds: ['prod-badboy', 'prod-valentino-prada', 'prod-discovery-gdl']
+  }
+];
+
+const MAGAZINE_SPREADS = [
+  {
+    label: 'Portada',
+    indicator: 'Portada · Página 1 de 6',
+    pages: [1],
+    tag: 'Portada · Edición 2026',
+    title: 'The Olfactory Journal · Casa Aroméa',
+    desc: 'Descubre nuestra edición editorial 2026. Haz clic en siguiente para abrir las páginas dobles de la revista.',
+    scentTheme: 'condesa',
+    productIds: ['prod-condesa', 'prod-bundle-hotel']
+  },
+  {
+    label: 'Págs 2–3',
+    indicator: 'Doble Página · Páginas 2 y 3 de 6',
+    pages: [2, 3],
+    tag: 'Colección de Espacios · Págs. 02–03',
+    title: 'Las 4 Personalidades para tu Hogar',
+    desc: 'Explora Condesa, Imperial, Majestad y Oceanic en presentaciones de 500 ml ($399) y 1 Litro ($549).',
+    scentTheme: 'majestad',
+    productIds: ['prod-condesa', 'prod-imperial', 'prod-majestad', 'prod-oceanic']
+  },
+  {
+    label: 'Págs 4–5',
+    indicator: 'Doble Página · Páginas 4 y 5 de 6',
+    pages: [4, 5],
+    tag: 'Bundle $799 + Perfumería · Págs. 04–05',
+    title: 'Pack Hotel de Lujo & Joyas @aromea.mx',
+    desc: 'Lleva el Bundle de 2.5 Litros por $799 o descubre Khamrah Lattafa, Mon Guerlain y My Way.',
+    scentTheme: 'imperial',
+    productIds: ['prod-bundle-hotel', 'prod-khamrah', 'prod-monguerlain', 'prod-myway']
+  },
+  {
+    label: 'Pág 6',
+    indicator: 'Contraportada · Página 6 de 6',
+    pages: [6],
+    tag: 'Contraportada · Página 06',
+    title: 'Caballero, Kits de Regalo & Contacto GDL',
+    desc: 'Cofres originales para regalo, minis y entregas en Guadalajara y todo México.',
+    scentTheme: 'oceanic',
+    productIds: ['prod-badboy', 'prod-valentino-prada', 'prod-discovery-gdl']
+  }
+];
+
+let magSingleMode = window.innerWidth <= 680;
+let magIndex = 0; // Index in MAGAZINE_SPREADS (if spread mode) or MAGAZINE_PAGES (if single mode)
+
+function renderMagazineFlipbook() {
+  const spreadContainer = document.getElementById('mag-spread-container');
+  const indicatorEl = document.getElementById('mag-spread-indicator');
+  const dotsRow = document.getElementById('mag-dots-row');
+  const modeLabel = document.getElementById('mag-mode-label');
+  if (!spreadContainer) return;
+
+  const itemsList = magSingleMode ? MAGAZINE_PAGES : MAGAZINE_SPREADS;
+  if (magIndex >= itemsList.length) magIndex = 0;
+  if (magIndex < 0) magIndex = itemsList.length - 1;
+
+  const current = itemsList[magIndex];
+  const isSingleSheet = magSingleMode || current.pages.length === 1;
+
+  spreadContainer.classList.toggle('single-mode', isSingleSheet);
+  spreadContainer.classList.remove('mag-flip-anim');
+  void spreadContainer.offsetWidth;
+  spreadContainer.classList.add('mag-flip-anim');
+
+  if (magSingleMode) {
+    indicatorEl.textContent = `Página ${current.page} de 6`;
+    modeLabel.textContent = '📖 Ver Doble Página';
+    spreadContainer.innerHTML = `
+      <div class="mag-page-frame">
+        <img src="${current.img}" alt="Catálogo Aroméa Página ${current.page}" />
+      </div>
+    `;
+  } else {
+    indicatorEl.textContent = current.indicator;
+    modeLabel.textContent = '📄 Ver 1 Página';
+    if (current.pages.length === 1) {
+      const pObj = MAGAZINE_PAGES[current.pages[0] - 1];
+      spreadContainer.innerHTML = `
+        <div class="mag-page-frame">
+          <img src="${pObj.img}" alt="Catálogo Aroméa Página ${pObj.page}" />
+        </div>
+      `;
+    } else {
+      const leftPage = MAGAZINE_PAGES[current.pages[0] - 1];
+      const rightPage = MAGAZINE_PAGES[current.pages[1] - 1];
+      spreadContainer.innerHTML = `
+        <div class="mag-page-frame page-left">
+          <img src="${leftPage.img}" alt="Catálogo Aroméa Página ${leftPage.page}" />
+        </div>
+        <div class="mag-page-frame page-right">
+          <img src="${rightPage.img}" alt="Catálogo Aroméa Página ${rightPage.page}" />
+        </div>
+      `;
+    }
+  }
+
+  // Render pagination dots
+  dotsRow.innerHTML = itemsList
+    .map((item, idx) => {
+      const label = magSingleMode ? `Pág ${item.page}` : item.label;
+      return `<button type="button" class="mag-page-dot ${idx === magIndex ? 'active' : ''}" data-mag-idx="${idx}">${label}</button>`;
+    })
+    .join('');
+
+  dotsRow.querySelectorAll('[data-mag-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      magIndex = Number(btn.getAttribute('data-mag-idx'));
+      renderMagazineFlipbook();
+    });
+  });
+
+  // Update contextual Shop-the-Page sidebar
+  document.getElementById('mag-sidebar-tag').textContent = current.tag;
+  document.getElementById('mag-sidebar-title').textContent = current.title;
+  document.getElementById('mag-sidebar-desc').textContent = current.desc;
+
+  const featuredContainer = document.getElementById('mag-featured-products');
+  const prods = current.productIds
+    .map(pid => CATALOG_PRODUCTS.find(p => p.id === pid))
+    .filter(Boolean);
+
+  featuredContainer.innerHTML = prods
+    .map(
+      p => `
+      <div class="mag-featured-item">
+        <img src="${p.img}" alt="${p.title}" style="cursor:pointer;" data-mag-pdp="${p.id}" />
+        <div style="flex:1; min-width:0;">
+          <strong style="display:block; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" data-mag-pdp="${p.id}">${p.title}</strong>
+          <small style="color:var(--aura-primary); font-weight:700; font-size:0.76rem;">$${p.price.toLocaleString('es-MX')} MXN</small>
+        </div>
+        <button type="button" class="add-cart-btn" data-mag-add="${p.id}" style="padding:7px 12px; font-size:0.74rem; flex-shrink:0;">+ Agregar</button>
+      </div>
+    `
+    )
+    .join('');
+
+  featuredContainer.querySelectorAll('[data-mag-pdp]').forEach(el => {
+    el.addEventListener('click', () => openProductModal(el.getAttribute('data-mag-pdp')));
+  });
+
+  featuredContainer.querySelectorAll('[data-mag-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prod = CATALOG_PRODUCTS.find(item => item.id === btn.getAttribute('data-mag-add'));
+      if (prod) {
+        addToCart({
+          id: prod.id,
+          title: prod.title,
+          subtitle: prod.sizes[0].label,
+          price: prod.sizes[0].price,
+          img: prod.img
+        });
+      }
+    });
+  });
+}
+
+const magPrevBtn = document.getElementById('mag-prev-btn');
+const magNextBtn = document.getElementById('mag-next-btn');
+const magModeToggle = document.getElementById('mag-mode-toggle');
+const magSpreadEl = document.getElementById('mag-spread-container');
+
+if (magPrevBtn) {
+  magPrevBtn.addEventListener('click', () => {
+    magIndex--;
+    renderMagazineFlipbook();
+  });
+}
+if (magNextBtn) {
+  magNextBtn.addEventListener('click', () => {
+    magIndex++;
+    renderMagazineFlipbook();
+  });
+}
+if (magModeToggle) {
+  magModeToggle.addEventListener('click', () => {
+    magSingleMode = !magSingleMode;
+    magIndex = 0;
+    renderMagazineFlipbook();
+  });
+}
+
+// Touch Swipe Support on Magazine Stage for Mobile & Tablet
+if (magSpreadEl) {
+  let touchStartX = 0;
+  magSpreadEl.addEventListener(
+    'touchstart',
+    e => {
+      if (e.changedTouches && e.changedTouches[0]) {
+        touchStartX = e.changedTouches[0].screenX;
+      }
+    },
+    { passive: true }
+  );
+  magSpreadEl.addEventListener(
+    'touchend',
+    e => {
+      if (e.changedTouches && e.changedTouches[0]) {
+        const diff = e.changedTouches[0].screenX - touchStartX;
+        if (Math.abs(diff) > 42) {
+          if (diff < 0) magIndex++;
+          else magIndex--;
+          renderMagazineFlipbook();
+        }
+      }
+    },
+    { passive: true }
+  );
+}
+
 /* Active Section Scroll Spy for Desktop Nav, Mobile Drawer & Bottom Bar */
-const sectionIds = ['hero', 'piramide', 'espacios', 'bundle-builder', 'catalogo', 'quiz'];
+const sectionIds = ['hero', 'piramide', 'espacios', 'bundle-builder', 'catalogo', 'revista', 'quiz'];
 const sectionObserver = new IntersectionObserver(
   entries => {
     entries.forEach(entry => {
@@ -1561,6 +1831,7 @@ setHeroScent('condesa', false);
 renderSpaceSimulator('recamara');
 renderBundleBuilder();
 renderCatalog('all');
+renderMagazineFlipbook();
 renderQuiz();
 renderCart();
 

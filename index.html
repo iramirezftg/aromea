@@ -42,6 +42,7 @@
         <a href="#espacios" class="nav-link">Simulador de Espacios</a>
         <a href="#bundle-builder" class="nav-link">Bundle $799</a>
         <a href="#catalogo" class="nav-link">Hogar &amp; Perfumes</a>
+        <a href="#revista" class="nav-link">Revista PDF</a>
         <a href="#quiz" class="nav-link">Quiz Sensorial</a>
       </nav>
 
@@ -142,11 +143,11 @@
           <small>Descubre tu fragancia ideal en 3 pasos</small>
         </div>
       </a>
-      <a href="catalogo-revista.html" class="mobile-nav-item">
+      <a href="#revista" class="mobile-nav-item" data-mobile-link>
         <span class="m-nav-icon">📖</span>
         <div>
           <strong>The Olfactory Journal (PDF)</strong>
-          <small>Catálogo editorial tipo revista 2026</small>
+          <small>Revista interactiva de 6 páginas</small>
         </div>
       </a>
     </nav>
@@ -515,7 +516,93 @@
     </section>
 
     <!-- ====================================================================
-         6. SOMMELIER OLFATIVO INTERACTIVO (QUIZ SENSORIAL)
+         6. CATÁLOGO EDITORIAL INTERACTIVO (FLIPBOOK + PDF DESCARGABLE)
+         ==================================================================== -->
+    <section class="section-container" id="revista">
+      <div class="magazine-section-card">
+        <div class="mag-header-bar">
+          <div>
+            <div class="section-eyebrow">Edición Impresa &amp; Digital 2026</div>
+            <h2 class="section-title">The Olfactory Journal · Catálogo Revista</h2>
+            <p class="section-subtitle">
+              Hojea las 6 páginas de nuestra revista editorial interactiva, agrega a tu bolsa los productos de cada página o descarga el PDF oficial listo para compartir o imprimir.
+            </p>
+          </div>
+
+          <div class="mag-actions-group">
+            <a href="Catalogo-Editorial-Aromea-2026.pdf" download="Catalogo-Editorial-Aromea-2026.pdf" class="btn-primary" style="text-decoration:none;">
+              <span>📥 Descargar PDF (6 Págs)</span>
+            </a>
+            <a href="catalogo-revista.html" class="btn-secondary" style="text-decoration:none;">
+              <span>🖨️ Vista Completa / Imprimir</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="mag-viewer-layout">
+          <!-- Left: Interactive Flipbook Stage -->
+          <div class="mag-flipbook-stage">
+            <div class="mag-stage-top-bar">
+              <span class="detail-layer-badge" id="mag-spread-indicator" style="margin-bottom:0;">Portada · Página 1 de 6</span>
+              <button type="button" class="icon-btn" id="mag-mode-toggle" style="height:34px; font-size:0.74rem; padding:0 12px;">
+                <span id="mag-mode-label">📄 Vista 1 Página</span>
+              </button>
+            </div>
+
+            <div class="mag-spread-container single-mode" id="mag-spread-container">
+              <!-- Populated dynamically by JS -->
+            </div>
+
+            <div class="mag-controls-bar">
+              <button type="button" class="icon-btn" id="mag-prev-btn">
+                <span>← Anterior</span>
+              </button>
+
+              <div class="mag-dots-row" id="mag-dots-row">
+                <!-- Populated dynamically by JS -->
+              </div>
+
+              <button type="button" class="icon-btn" id="mag-next-btn">
+                <span>Siguiente →</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Shop-the-Page Contextual Sidebar -->
+          <div class="mag-shop-sidebar">
+            <div>
+              <span class="detail-layer-badge" id="mag-sidebar-tag">En esta edición</span>
+              <h3 id="mag-sidebar-title" style="font-family:var(--font-display); font-size:1.75rem; line-height:1.15; margin-bottom:8px;">
+                The Olfactory Journal · Portada
+              </h3>
+              <p id="mag-sidebar-desc" style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:18px;">
+                Descubre nuestra arquitectura olfativa para el hogar y la curaduría exclusiva de alta perfumería en Guadalajara.
+              </p>
+
+              <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--aura-primary); font-weight:700; margin-bottom:10px;">
+                Compra directa de esta página:
+              </div>
+              <div id="mag-featured-products">
+                <!-- Populated dynamically by JS -->
+              </div>
+            </div>
+
+            <div style="padding-top:16px; border-top:1px solid var(--border-subtle); margin-top:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:var(--text-secondary); margin-bottom:10px;">
+                <span>Formato Editorial Carta HD</span>
+                <strong style="color:var(--gold-light);">6 Páginas · PDF Oficial</strong>
+              </div>
+              <a href="Catalogo-Editorial-Aromea-2026.pdf" download="Catalogo-Editorial-Aromea-2026.pdf" class="btn-secondary" style="width:100%; justify-content:center; text-decoration:none; font-size:0.82rem;">
+                <span>📥 Guardar Catálogo en mi Dispositivo</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         7. SOMMELIER OLFATIVO INTERACTIVO (QUIZ SENSORIAL)
          ==================================================================== -->
     <section class="section-container" id="quiz">
       <div class="quiz-card">
