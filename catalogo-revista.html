@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aroméa — The Olfactory Journal · Catálogo Revista 2026 (PDF)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #d4af37;
+      --rose: #e8a5b0;
+      --purple: #b185eb;
+      --ocean: #4cc3f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050508;
+      color: #f7f4ef;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      padding: 0 0 60px;
+      overflow-x: hidden;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(12, 12, 18, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 12px 28px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar-btn {
+      background: linear-gradient(135deg, #e8a5b0, #d4af37);
+      color: #09090c;
+      font-weight: 700;
+      font-size: 0.84rem;
+      padding: 10px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .toolbar-btn.secondary {
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .mag-container {
+      padding: 0 20px;
+    }
+    .mag-sheet {
+      width: min(820px, 100%);
+      margin: 0 auto 38px;
+      background: #09090d;
+      border: 1px solid rgba(212, 175, 55, 0.42);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 28px 70px rgba(0,0,0,0.75);
+      page-break-after: always;
+    }
+    .mag-sheet img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .toolbar {
+        padding: 12px 16px;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .toolbar-actions {
+        width: 100%;
+      }
+      .toolbar-actions .toolbar-btn {
+        flex: 1 1 auto;
+        font-size: 0.78rem;
+        padding: 9px 14px;
+      }
+      .mag-container {
+        padding: 0 12px;
+      }
+      .mag-sheet {
+        margin-bottom: 22px;
+        border-radius: 12px;
+      }
+    }
+    @media (max-width: 480px) {
+      .toolbar-left {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .toolbar-actions {
+        flex-direction: column;
+      }
+      .toolbar-actions .toolbar-btn {
+        width: 100%;
+      }
+    }
+    @media print {
+      body { background: #09090d; padding: 0; }
+      .toolbar { display: none !important; }
+      .mag-container { padding: 0; }
+      .mag-sheet {
+        width: 100%;
+        margin: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        page-break-after: always;
+      }
+      @page { size: letter portrait; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <a href="index.html" class="toolbar-btn secondary">← Volver a la Tienda</a>
+      <div>
+        <strong style="font-family:'Cormorant Garamond',serif; font-size:clamp(1.1rem, 3.5vw, 1.35rem); color:#f3dfb2;">AROMÉA · THE OLFACTORY JOURNAL (EDICIÓN 2026)</strong>
+        <span style="display:block; font-size:0.72rem; color:#b8b2a8;">Catálogo tipo Revista de 6 Páginas · Hogar &amp; Perfumería @aromea.mx</span>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <a href="Catalogo-Editorial-Aromea-2026.pdf" download="Catalogo-Editorial-Aromea-2026.pdf" class="toolbar-btn">
+        📥 Descargar PDF Oficial (6 Págs)
+      </a>
+      <button onclick="window.print()" class="toolbar-btn secondary">
+        🖨️ Imprimir / Guardar PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="mag-container">
+    <div class="mag-sheet"><img src="assets/img/mag-p1.png" alt="Página 1 Portada Aroméa" /></div>
+    <div class="mag-sheet"><img src="assets/img/mag-p2.png" alt="Página 2 Condesa e Imperial" /></div>
+    <div class="mag-sheet"><img src="assets/img/mag-p3.png" alt="Página 3 Majestad y Oceanic" /></div>
+    <div class="mag-sheet"><img src="assets/img/mag-p4.png" alt="Página 4 Bundle Hotel de Lujo $799" /></div>
+    <div class="mag-sheet"><img src="assets/img/mag-p5.png" alt="Página 5 Perfumería Dama y Árabe @aromea.mx" /></div>
+    <div class="mag-sheet"><img src="assets/img/mag-p6.png" alt="Página 6 Caballero, Kits y Directorio" /></div>
+  </div>
+</body>
+</html>

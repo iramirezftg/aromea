@@ -1,0 +1,158 @@
+{% comment %}
+  AROMÉA — ATELIER SENSORIAL INTERACTIVO (SHOPIFY DAWN CUSTOM SECTION)
+  Instrucciones:
+  1. En tu panel de Shopify ve a Tienda Online -> Temas -> Editar código.
+  2. En la carpeta "sections/", haz clic en "Agregar una nueva sección" y nómbrala: aromea-atelier.liquid
+  3. Pega este contenido, guarda y agrégala desde el Personalizador de Temas.
+{% endcomment %}
+
+<section class="aromea-atelier-section" data-scent="condesa" id="aromea-atelier-{{ section.id }}">
+  <style>
+    #aromea-atelier-{{ section.id }} {
+      --aura-primary: #e8a5b0;
+      --aura-rgb: 232, 165, 176;
+      --gold-main: #d4af37;
+      background: #07070a;
+      color: #f7f4ef;
+      padding: 64px 24px;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
+    #aromea-atelier-{{ section.id }}[data-scent="condesa"] { --aura-primary: #e8a5b0; --aura-rgb: 232, 165, 176; }
+    #aromea-atelier-{{ section.id }}[data-scent="imperial"] { --aura-primary: #dfb76c; --aura-rgb: 223, 183, 108; }
+    #aromea-atelier-{{ section.id }}[data-scent="majestad"] { --aura-primary: #b185eb; --aura-rgb: 177, 133, 235; }
+    #aromea-atelier-{{ section.id }}[data-scent="oceanic"] { --aura-primary: #4cc3f7; --aura-rgb: 76, 195, 247; }
+
+    .aromea-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .aromea-pills {
+      display: inline-flex;
+      gap: 8px;
+      background: rgba(255,255,255,0.05);
+      padding: 6px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .aromea-pill-btn {
+      background: transparent;
+      color: #b8b2a8;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .aromea-pill-btn.active {
+      background: rgba(var(--aura-rgb), 0.25);
+      color: #fff;
+    }
+    .aromea-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.5rem, 4.5vw, 4.2rem);
+      line-height: 1.05;
+      margin: 0 0 16px;
+      color: #fff;
+    }
+    .aromea-heading em {
+      color: var(--aura-primary);
+      font-style: italic;
+    }
+    .aromea-pyramid-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(var(--aura-rgb), 0.35);
+      border-radius: 20px;
+      padding: 20px;
+      margin: 22px 0;
+    }
+    .aromea-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--aura-primary), var(--gold-main));
+      color: #09090c;
+      font-weight: 700;
+      padding: 15px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+    }
+    @media (max-width: 900px) {
+      #aromea-atelier-{{ section.id }} { padding: 48px 18px; }
+      .aromea-container { grid-template-columns: 1fr; gap: 28px; }
+    }
+    @media (max-width: 560px) {
+      #aromea-atelier-{{ section.id }} { padding: 36px 14px; }
+      .aromea-pills { display: grid; grid-template-columns: repeat(2, 1fr); width: 100%; border-radius: 16px; }
+      .aromea-pill-btn { width: 100%; text-align: center; padding: 10px 8px; border-radius: 12px; }
+      .aromea-cta { width: 100%; justify-content: center; text-align: center; padding: 14px 20px; }
+    }
+  </style>
+
+  <div class="aromea-container">
+    <div>
+      <div class="aromea-pills">
+        <button type="button" class="aromea-pill-btn active" onclick="switchAromeaScent('{{ section.id }}','condesa','Condesa: <em>Frescura pura</em> que despierta tus sentidos.','Mandarina, Bergamota · Lirio de los Valles, Jazmín, Rosa · Sándalo, Vetiver, Almizcle')">Condesa</button>
+        <button type="button" class="aromea-pill-btn" onclick="switchAromeaScent('{{ section.id }}','imperial','Imperial: <em>Elegancia y carácter</em> que dejan huella.','Cardamomo, Pimienta Rosa · Lavanda Real, Cedro · Madera de Oud, Ámbar')">Imperial</button>
+        <button type="button" class="aromea-pill-btn" onclick="switchAromeaScent('{{ section.id }}','majestad','Majestad: <em>El lujo envolvente</em> en tu espacio.','Ciruela, Azafrán · Orquídea Púrpura, Iris · Vainilla de Madagascar, Sándalo')">Majestad</button>
+        <button type="button" class="aromea-pill-btn" onclick="switchAromeaScent('{{ section.id }}','oceanic','Oceanic: <em>La brisa infinita</em> del océano.','Brisa Marina, Toronja Blanca · Salvia Azul, Ciprés · Madera Flotante, Ámbar Marino')">Oceanic</button>
+      </div>
+
+      <h2 class="aromea-heading" id="aromea-title-{{ section.id }}">
+        Condesa: <em>Frescura pura</em> que despierta tus sentidos.
+      </h2>
+
+      <div class="aromea-pyramid-box">
+        <strong style="color:var(--aura-primary); text-transform:uppercase; font-size:0.75rem; letter-spacing:0.14em;">Pirámide Olfativa (Salida · Corazón · Fondo)</strong>
+        <p id="aromea-notes-{{ section.id }}" style="margin:8px 0 0; color:#d8d2c9;">
+          Mandarina, Bergamota · Lirio de los Valles, Jazmín, Rosa · Sándalo, Vetiver, Almizcle
+        </p>
+      </div>
+
+      <a href="{{ section.settings.bundle_link | default: '/collections/all' }}" class="aromea-cta">
+        {{ section.settings.cta_text | default: 'Explorar Colección & Bundle $799 MXN' }}
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function switchAromeaScent(secId, scent, titleHtml, notesText) {
+      var root = document.getElementById('aromea-atelier-' + secId);
+      root.setAttribute('data-scent', scent);
+      document.getElementById('aromea-title-' + secId).innerHTML = titleHtml;
+      document.getElementById('aromea-notes-' + secId).textContent = notesText;
+    }
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Aroméa Atelier Sensorial",
+  "settings": [
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Texto del botón principal",
+      "default": "Armar Bundle Hotel de Lujo ($799 MXN)"
+    },
+    {
+      "type": "url",
+      "id": "bundle_link",
+      "label": "Enlace del botón"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aroméa Atelier Sensorial"
+    }
+  ]
+}
+{% endschema %}
+
