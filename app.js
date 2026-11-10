@@ -1620,7 +1620,155 @@ const MAGAZINE_SPREADS = [
 ];
 
 let magSingleMode = window.innerWidth <= 680;
-let magIndex = 0; // Index in MAGAZINE_SPREADS (if spread mode) or MAGAZINE_PAGES (if single mode)
+let magIndex = 0; // Spread index (0..3) in spread mode, or Page index (0..5) in single mode
+let magBuiltMode = null;
+
+function buildFlipbookDOM() {
+  const spreadContainer = document.getElementById('mag-spread-container');
+  if (!spreadContainer) return;
+  magBuiltMode = magSingleMode ? 'single' : 'spread';
+  spreadContainer.classList.toggle('single-mode', magSingleMode);
+
+  if (!magSingleMode) {
+    // 3 physical double-sided sheets (Hoja 0: P1/P2, Hoja 1: P3/P4, Hoja 2: P5/P6)
+    const sheets = [
+      { front: MAGAZINE_PAGES[0], back: MAGAZINE_PAGES[1] },
+      { front: MAGAZINE_PAGES[2], back: MAGAZINE_PAGES[3] },
+      { front: MAGAZINE_PAGES[4], back: MAGAZINE_PAGES[5] }
+    ];
+    spreadContainer.innerHTML = `
+      <div class="flipbook-3d-book closed-front" id="flipbook-3d-book">
+        <div class="book-spine-line"></div>
+        ${sheets
+          .map(
+            (sh, idx) => `
+          <div class="flip-leaf" data-leaf-idx="${idx}" style="z-index:${10 - idx};">
+            <div class="flip-face flip-front" data-click-dir="next" title="Haz clic o arrastra para pasar a la siguiente página">
+              <img src="${sh.front.img}" alt="Página ${sh.front.page}" draggable="false" />
+              <div class="leaf-turn-glare"></div>
+              <span class="page-corner-curl curl-right">Pág ${sh.front.page} · Pasar ↻</span>
+            </div>
+            <div class="flip-face flip-back" data-click-dir="prev" title="Haz clic o arrastra para regresar a la página anterior">
+              <img src="${sh.back.img}" alt="Página ${sh.back.page}" draggable="false" />
+              <div class="leaf-turn-glare"></div>
+              <span class="page-corner-curl curl-left">↺ Volver · Pág ${sh.back.page}</span>
+            </div>
+          </div>
+        `
+          )
+          .join('')}
+      </div>
+    `;
+  } else {
+    // Single-Page 3D Flipbook (6 sheets anchored on left spine)
+    spreadContainer.innerHTML = `
+      <div class="flipbook-3d-book single-page-3d" id="flipbook-3d-book">
+        ${MAGAZINE_PAGES.map(
+          (pg, idx) => `
+          <div class="flip-leaf" data-leaf-idx="${idx}" style="z-index:${20 - idx};">
+            <div class="flip-face flip-front" data-click-dir="next" title="Toca o desliza para pasar de página">
+              <img src="${pg.img}" alt="Página ${pg.page}" draggable="false" />
+              <div class="leaf-turn-glare"></div>
+              <span class="page-corner-curl curl-right">Pág ${pg.page}/6 · Pasar ↻</span>
+            </div>
+          </div>
+        `
+        ).join('')}
+      </div>
+    `;
+  }
+
+  bindFlipbookInteractions();
+}
+
+function bindFlipbookInteractions() {
+  const bookEl = document.getElementById('flipbook-3d-book');
+  if (!bookEl) return;
+
+  let startX = null;
+  let activeLeaf = null;
+  let dragDir = null;
+  let isDragging = false;
+
+  bookEl.addEventListener('pointerdown', e => {
+    const face = e.target.closest('.flip-face');
+    if (!face) return;
+    startX = e.clientX;
+    isDragging = false;
+    dragDir = face.getAttribute('data-click-dir');
+    activeLeaf = face.closest('.flip-leaf');
+  });
+
+  window.addEventListener('pointermove', e => {
+    if (startX === null || !activeLeaf) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 8) {
+      isDragging = true;
+      activeLeaf.classList.add('is-dragging', 'is-turning');
+      activeLeaf.style.transition = 'none';
+      activeLeaf.style.zIndex = '35';
+
+      const rect = bookEl.getBoundingClientRect();
+      const halfWidth = Math.max(140, rect.width * (magSingleMode ? 0.85 : 0.5));
+
+      if (!magSingleMode) {
+        if (dragDir === 'next') {
+          const progress = Math.max(0, Math.min(1, -dx / halfWidth));
+          const deg = -progress * 180;
+          activeLeaf.style.transform = `rotateY(${deg}deg)`;
+        } else {
+          const progress = Math.max(0, Math.min(1, dx / halfWidth));
+          const deg = -180 + progress * 180;
+          activeLeaf.style.transform = `rotateY(${deg}deg)`;
+        }
+      } else {
+        if (dx < 0 && magIndex < MAGAZINE_PAGES.length - 1) {
+          const progress = Math.max(0, Math.min(1, -dx / halfWidth));
+          activeLeaf.style.transform = `rotateY(${-progress * 125}deg)`;
+        }
+      }
+    }
+  });
+
+  window.addEventListener('pointerup', e => {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+
+    if (activeLeaf) {
+      activeLeaf.style.transition = '';
+      activeLeaf.style.transform = '';
+      activeLeaf.classList.remove('is-dragging');
+    }
+
+    if (isDragging) {
+      if (dx < -35) {
+        goToMagIndex(magIndex + 1);
+      } else if (dx > 35) {
+        goToMagIndex(magIndex - 1);
+      } else {
+        renderMagazineFlipbook();
+      }
+    } else if (activeLeaf) {
+      if (dragDir === 'next') {
+        goToMagIndex(magIndex + 1);
+      } else {
+        goToMagIndex(magIndex - 1);
+      }
+    }
+
+    startX = null;
+    activeLeaf = null;
+    isDragging = false;
+  });
+}
+
+function goToMagIndex(newIdx) {
+  const itemsList = magSingleMode ? MAGAZINE_PAGES : MAGAZINE_SPREADS;
+  if (newIdx < 0) newIdx = 0;
+  if (newIdx >= itemsList.length) newIdx = 0; // loop back to cover when clicking after last page
+  magIndex = newIdx;
+  renderMagazineFlipbook();
+}
 
 function renderMagazineFlipbook() {
   const spreadContainer = document.getElementById('mag-spread-container');
@@ -1629,48 +1777,53 @@ function renderMagazineFlipbook() {
   const modeLabel = document.getElementById('mag-mode-label');
   if (!spreadContainer) return;
 
+  const targetMode = magSingleMode ? 'single' : 'spread';
+  if (magBuiltMode !== targetMode) {
+    buildFlipbookDOM();
+  }
+
   const itemsList = magSingleMode ? MAGAZINE_PAGES : MAGAZINE_SPREADS;
   if (magIndex >= itemsList.length) magIndex = 0;
   if (magIndex < 0) magIndex = itemsList.length - 1;
 
   const current = itemsList[magIndex];
-  const isSingleSheet = magSingleMode || current.pages.length === 1;
+  const bookEl = document.getElementById('flipbook-3d-book');
+  const leaves = bookEl ? bookEl.querySelectorAll('.flip-leaf') : [];
 
-  spreadContainer.classList.toggle('single-mode', isSingleSheet);
-  spreadContainer.classList.remove('mag-flip-anim');
-  void spreadContainer.offsetWidth;
-  spreadContainer.classList.add('mag-flip-anim');
-
-  if (magSingleMode) {
-    indicatorEl.textContent = `Página ${current.page} de 6`;
-    modeLabel.textContent = '📖 Ver Doble Página';
-    spreadContainer.innerHTML = `
-      <div class="mag-page-frame">
-        <img src="${current.img}" alt="Catálogo Aroméa Página ${current.page}" />
-      </div>
-    `;
-  } else {
+  if (!magSingleMode && bookEl) {
     indicatorEl.textContent = current.indicator;
-    modeLabel.textContent = '📄 Ver 1 Página';
-    if (current.pages.length === 1) {
-      const pObj = MAGAZINE_PAGES[current.pages[0] - 1];
-      spreadContainer.innerHTML = `
-        <div class="mag-page-frame">
-          <img src="${pObj.img}" alt="Catálogo Aroméa Página ${pObj.page}" />
-        </div>
-      `;
-    } else {
-      const leftPage = MAGAZINE_PAGES[current.pages[0] - 1];
-      const rightPage = MAGAZINE_PAGES[current.pages[1] - 1];
-      spreadContainer.innerHTML = `
-        <div class="mag-page-frame page-left">
-          <img src="${leftPage.img}" alt="Catálogo Aroméa Página ${leftPage.page}" />
-        </div>
-        <div class="mag-page-frame page-right">
-          <img src="${rightPage.img}" alt="Catálogo Aroméa Página ${rightPage.page}" />
-        </div>
-      `;
-    }
+    modeLabel.textContent = '📄 Vista 1 Página';
+
+    bookEl.classList.toggle('closed-front', magIndex === 0);
+    bookEl.classList.toggle('open-spread', magIndex === 1 || magIndex === 2);
+    bookEl.classList.toggle('closed-back', magIndex === 3);
+
+    leaves.forEach((leaf, idx) => {
+      const wasFlipped = leaf.classList.contains('is-flipped');
+      const shouldBeFlipped = idx < magIndex;
+
+      if (wasFlipped !== shouldBeFlipped) {
+        leaf.classList.add('is-turning');
+        leaf.style.zIndex = '30';
+        setTimeout(() => {
+          leaf.classList.remove('is-turning');
+          leaf.style.zIndex = shouldBeFlipped ? String(10 + idx) : String(10 - idx);
+        }, 860);
+      } else {
+        leaf.style.zIndex = shouldBeFlipped ? String(10 + idx) : String(10 - idx);
+      }
+
+      leaf.classList.toggle('is-flipped', shouldBeFlipped);
+    });
+  } else if (bookEl) {
+    indicatorEl.textContent = `Página ${current.page} de 6`;
+    modeLabel.textContent = '📖 Vista Doble Página';
+
+    leaves.forEach((leaf, idx) => {
+      const shouldBeFlipped = idx < magIndex;
+      leaf.classList.toggle('is-flipped', shouldBeFlipped);
+      leaf.style.zIndex = String(20 - idx);
+    });
   }
 
   // Render pagination dots
@@ -1683,8 +1836,7 @@ function renderMagazineFlipbook() {
 
   dotsRow.querySelectorAll('[data-mag-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
-      magIndex = Number(btn.getAttribute('data-mag-idx'));
-      renderMagazineFlipbook();
+      goToMagIndex(Number(btn.getAttribute('data-mag-idx')));
     });
   });
 
@@ -1736,18 +1888,15 @@ function renderMagazineFlipbook() {
 const magPrevBtn = document.getElementById('mag-prev-btn');
 const magNextBtn = document.getElementById('mag-next-btn');
 const magModeToggle = document.getElementById('mag-mode-toggle');
-const magSpreadEl = document.getElementById('mag-spread-container');
 
 if (magPrevBtn) {
   magPrevBtn.addEventListener('click', () => {
-    magIndex--;
-    renderMagazineFlipbook();
+    goToMagIndex(magIndex - 1);
   });
 }
 if (magNextBtn) {
   magNextBtn.addEventListener('click', () => {
-    magIndex++;
-    renderMagazineFlipbook();
+    goToMagIndex(magIndex + 1);
   });
 }
 if (magModeToggle) {
@@ -1756,34 +1905,6 @@ if (magModeToggle) {
     magIndex = 0;
     renderMagazineFlipbook();
   });
-}
-
-// Touch Swipe Support on Magazine Stage for Mobile & Tablet
-if (magSpreadEl) {
-  let touchStartX = 0;
-  magSpreadEl.addEventListener(
-    'touchstart',
-    e => {
-      if (e.changedTouches && e.changedTouches[0]) {
-        touchStartX = e.changedTouches[0].screenX;
-      }
-    },
-    { passive: true }
-  );
-  magSpreadEl.addEventListener(
-    'touchend',
-    e => {
-      if (e.changedTouches && e.changedTouches[0]) {
-        const diff = e.changedTouches[0].screenX - touchStartX;
-        if (Math.abs(diff) > 42) {
-          if (diff < 0) magIndex++;
-          else magIndex--;
-          renderMagazineFlipbook();
-        }
-      }
-    },
-    { passive: true }
-  );
 }
 
 /* Active Section Scroll Spy for Desktop Nav, Mobile Drawer & Bottom Bar */

@@ -3,39 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aroméa — The Olfactory Journal · Catálogo Revista 2026 (PDF)</title>
+  <title>Aroméa — The Olfactory Journal · Flipbook 3D Interactivo (2026)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --gold: #d4af37;
+      --gold-light: #f3dfb2;
       --rose: #e8a5b0;
       --purple: #b185eb;
       --ocean: #4cc3f7;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #050508;
+      background: radial-gradient(circle at 50% 35%, rgba(232, 165, 176, 0.14), rgba(212, 175, 55, 0.06) 45%, #050508 100%);
       color: #f7f4ef;
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      padding: 0 0 60px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
     }
+
+    /* Sticky Top Toolbar */
     .toolbar {
       position: sticky;
       top: 0;
-      z-index: 50;
+      z-index: 60;
       background: rgba(12, 12, 18, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-      padding: 12px 28px;
-      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.32);
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     .toolbar-left {
@@ -48,13 +52,14 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
     .toolbar-btn {
       background: linear-gradient(135deg, #e8a5b0, #d4af37);
       color: #09090c;
       font-weight: 700;
-      font-size: 0.84rem;
-      padding: 10px 20px;
+      font-size: 0.82rem;
+      padding: 9px 18px;
       border-radius: 999px;
       text-decoration: none;
       border: none;
@@ -62,16 +67,299 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       white-space: nowrap;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+    .toolbar-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(232, 165, 176, 0.3);
     }
     .toolbar-btn.secondary {
       background: rgba(255,255,255,0.06);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.16);
     }
-    .mag-container {
-      padding: 0 20px;
+    .toolbar-btn.secondary:hover {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.16);
+    }
+
+    /* ======================================================================
+       INTERACTIVE 3D FLIPBOOK STAGE
+       ====================================================================== */
+    .flipbook-stage-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 28px;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .flipbook-header-meta {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .flipbook-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 99px;
+      background: rgba(212, 175, 55, 0.16);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: var(--gold-light);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .flipbook-caption {
+      font-size: 0.84rem;
+      color: #b8b2a8;
+    }
+
+    .book-arena {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      perspective: 2600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 8px auto 18px;
+      user-select: none;
+    }
+
+    .book-3d {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1800 / 1165;
+      transform-style: preserve-3d;
+      transition: transform 0.88s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+    .book-3d.closed-front {
+      transform: translateX(-25%);
+    }
+    .book-3d.open-spread {
+      transform: translateX(0%);
+    }
+    .book-3d.closed-back {
+      transform: translateX(25%);
+    }
+
+    /* Central Spine Highlight */
+    .spine-glow {
+      position: absolute;
+      top: 1.5%;
+      bottom: 1.5%;
+      left: 50%;
+      width: 3px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.65), transparent);
+      z-index: 40;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .book-3d.open-spread .spine-glow {
+      opacity: 1;
+    }
+
+    /* Physical Double-Sided Sheet (Leaf) */
+    .sheet-leaf {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 50%;
+      height: 100%;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+      cursor: grab;
+      will-change: transform;
+    }
+    .sheet-leaf:active {
+      cursor: grabbing;
+    }
+    .sheet-leaf.is-flipped {
+      transform: rotateY(-180deg);
+    }
+
+    @media (hover: hover) {
+      .sheet-leaf:not(.is-flipped):not(.is-dragging):hover {
+        transform: rotateY(-10deg);
+      }
+      .sheet-leaf.is-flipped:not(.is-dragging):hover {
+        transform: rotateY(-170deg);
+      }
+    }
+
+    .sheet-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: #09090d;
+      overflow: hidden;
+      border: 1px solid rgba(212, 175, 55, 0.48);
+      box-shadow: 0 28px 65px rgba(0, 0, 0, 0.78);
+    }
+    .sheet-face.face-front {
+      border-radius: 0 14px 14px 0;
+    }
+    .sheet-face.face-back {
+      transform: rotateY(180deg);
+      border-radius: 14px 0 0 14px;
+    }
+    .sheet-face img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* Inner Spine Crease Shadow */
+    .sheet-face.face-front::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.16) 8%, rgba(255,255,255,0.05) 18%, transparent 38%);
+      pointer-events: none;
+    }
+    .sheet-face.face-back::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(270deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.16) 8%, rgba(255,255,255,0.05) 18%, transparent 38%);
+      pointer-events: none;
+    }
+
+    /* Specular Lighting Sweep during Page Turn */
+    .turn-sheen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 18%, rgba(255, 245, 220, 0.18) 48%, rgba(0, 0, 0, 0.42) 86%);
+      opacity: 0;
+      transition: opacity 0.45s ease;
+      pointer-events: none;
+    }
+    .sheet-leaf.is-turning .turn-sheen {
+      opacity: 1;
+    }
+
+    /* Corner Curl Callout */
+    .corner-peel {
+      position: absolute;
+      bottom: 14px;
+      z-index: 6;
+      background: rgba(12, 12, 18, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(212, 175, 55, 0.6);
+      color: var(--gold-light);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 6px 13px;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+      pointer-events: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.55);
+      transition: all 0.3s ease;
+    }
+    .corner-peel.peel-right { right: 14px; }
+    .corner-peel.peel-left { left: 14px; }
+    .sheet-leaf:hover .corner-peel {
+      background: var(--gold);
+      color: #09090c;
+      transform: scale(1.06);
+    }
+
+    /* Single-Page 3D Mode (Mobile or 1-Page Toggle) */
+    .book-3d.single-3d {
+      aspect-ratio: 900 / 1165;
+      max-width: 470px;
+      margin: 0 auto;
+      transform: none !important;
+    }
+    .book-3d.single-3d .sheet-leaf {
+      left: 0;
+      width: 100%;
+      transform-origin: left center;
+    }
+    .book-3d.single-3d .sheet-face.face-front {
+      border-radius: 10px 14px 14px 10px;
+    }
+    .book-3d.single-3d .sheet-leaf.is-flipped {
+      transform: rotateY(-130deg);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Controls & Thumbnail Strip */
+    .flipbook-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .nav-arrow-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-arrow-btn:hover {
+      background: var(--gold);
+      color: #09090c;
+    }
+    .thumbs-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .thumb-pill {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #b8b2a8;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.25s ease;
+    }
+    .thumb-pill.active,
+    .thumb-pill:hover {
+      background: var(--gold);
+      color: #09090c;
+      border-color: var(--gold);
+    }
+
+    /* Continuous Vertical View (Hidden unless toggled or printing) */
+    .continuous-print-view {
+      display: none;
+      padding: 20px;
+    }
+    body.continuous-mode .flipbook-stage-wrapper {
+      display: none;
+    }
+    body.continuous-mode .continuous-print-view {
+      display: block;
     }
     .mag-sheet {
       width: min(820px, 100%);
@@ -88,44 +376,52 @@
       height: auto;
       display: block;
     }
+
     @media (max-width: 768px) {
       .toolbar {
-        padding: 12px 16px;
-        gap: 12px;
-        margin-bottom: 20px;
+        padding: 10px 14px;
+        gap: 10px;
       }
       .toolbar-actions {
         width: 100%;
       }
       .toolbar-actions .toolbar-btn {
         flex: 1 1 auto;
-        font-size: 0.78rem;
-        padding: 9px 14px;
+        font-size: 0.76rem;
+        padding: 8px 12px;
       }
-      .mag-container {
-        padding: 0 12px;
+      .flipbook-stage-wrapper {
+        padding: 14px 12px 24px;
       }
-      .mag-sheet {
-        margin-bottom: 22px;
-        border-radius: 12px;
+      .corner-peel {
+        font-size: 0.64rem;
+        padding: 4px 10px;
       }
     }
+
     @media (max-width: 480px) {
       .toolbar-left {
         width: 100%;
         justify-content: space-between;
       }
-      .toolbar-actions {
-        flex-direction: column;
+      .nav-arrow-btn {
+        padding: 8px 14px;
+        font-size: 0.78rem;
       }
-      .toolbar-actions .toolbar-btn {
-        width: 100%;
+      .thumb-pill {
+        padding: 6px 10px;
+        font-size: 0.7rem;
       }
     }
+
     @media print {
       body { background: #09090d; padding: 0; }
-      .toolbar { display: none !important; }
-      .mag-container { padding: 0; }
+      .toolbar,
+      .flipbook-stage-wrapper { display: none !important; }
+      .continuous-print-view {
+        display: block !important;
+        padding: 0;
+      }
       .mag-sheet {
         width: 100%;
         margin: 0;
@@ -143,21 +439,48 @@
     <div class="toolbar-left">
       <a href="index.html#revista" class="toolbar-btn secondary">← Volver a la Tienda</a>
       <div>
-        <strong style="font-family:'Cormorant Garamond',serif; font-size:clamp(1.1rem, 3.5vw, 1.35rem); color:#f3dfb2;">AROMÉA · THE OLFACTORY JOURNAL (EDICIÓN 2026)</strong>
-        <span style="display:block; font-size:0.72rem; color:#b8b2a8;">Catálogo tipo Revista de 6 Páginas · Hogar &amp; Perfumería @aromea.mx</span>
+        <strong style="font-family:'Cormorant Garamond',serif; font-size:clamp(1.1rem, 3.2vw, 1.35rem); color:#f3dfb2;">AROMÉA · THE OLFACTORY JOURNAL (FLIPBOOK 3D)</strong>
+        <span style="display:block; font-size:0.71rem; color:#b8b2a8;">Haz clic o arrastra las esquinas para pasar las páginas en 3D</span>
       </div>
     </div>
     <div class="toolbar-actions">
+      <button type="button" id="toggle-single-spread-btn" class="toolbar-btn secondary">
+        📄 Vista 1 Página
+      </button>
+      <button type="button" id="toggle-continuous-btn" class="toolbar-btn secondary">
+        📜 Vista Continua
+      </button>
       <a href="Catalogo-Editorial-Aromea-2026.pdf" download="Catalogo-Editorial-Aromea-2026.pdf" class="toolbar-btn">
-        📥 Descargar PDF Oficial (6 Págs)
+        📥 Descargar PDF (6 Págs)
       </a>
-      <button onclick="window.print()" class="toolbar-btn secondary">
-        🖨️ Imprimir / Guardar PDF
+      <button type="button" onclick="window.print()" class="toolbar-btn secondary">
+        🖨️ Imprimir
       </button>
     </div>
   </div>
 
-  <div class="mag-container">
+  <!-- 1. INTERACTIVE 3D PAGE-TURNING FLIPBOOK -->
+  <main class="flipbook-stage-wrapper">
+    <div class="flipbook-header-meta">
+      <span class="flipbook-badge" id="standalone-indicator">Portada · Página 1 de 6</span>
+      <p class="flipbook-caption" id="standalone-caption">
+        Toca o arrastra cualquier página hacia la izquierda/derecha para hojear la revista en 3D
+      </p>
+    </div>
+
+    <div class="book-arena" id="standalone-book-arena">
+      <!-- Populated dynamically by 3D Flipbook Engine -->
+    </div>
+
+    <div class="flipbook-controls">
+      <button type="button" class="nav-arrow-btn" id="standalone-prev-btn">← Anterior</button>
+      <div class="thumbs-bar" id="standalone-thumbs-bar"></div>
+      <button type="button" class="nav-arrow-btn" id="standalone-next-btn">Siguiente →</button>
+    </div>
+  </main>
+
+  <!-- 2. CONTINUOUS SCROLL & PRINT VIEW -->
+  <div class="continuous-print-view">
     <div class="mag-sheet"><img src="assets/img/mag-p1.png" alt="Página 1 Portada Aroméa" /></div>
     <div class="mag-sheet"><img src="assets/img/mag-p2.png" alt="Página 2 Condesa e Imperial" /></div>
     <div class="mag-sheet"><img src="assets/img/mag-p3.png" alt="Página 3 Majestad y Oceanic" /></div>
@@ -165,5 +488,237 @@
     <div class="mag-sheet"><img src="assets/img/mag-p5.png" alt="Página 5 Perfumería Dama y Árabe @aromea.mx" /></div>
     <div class="mag-sheet"><img src="assets/img/mag-p6.png" alt="Página 6 Caballero, Kits y Directorio" /></div>
   </div>
+
+  <script>
+    const PAGES = [
+      { page: 1, img: 'assets/img/mag-p1.png', title: 'Portada · The Olfactory Journal 2026' },
+      { page: 2, img: 'assets/img/mag-p2.png', title: 'Página 2 · Condesa & Imperial' },
+      { page: 3, img: 'assets/img/mag-p3.png', title: 'Página 3 · Majestad & Oceanic' },
+      { page: 4, img: 'assets/img/mag-p4.png', title: 'Página 4 · Bundle Hotel de Lujo $799 MXN' },
+      { page: 5, img: 'assets/img/mag-p5.png', title: 'Página 5 · Perfumería Dama & Árabe @aromea.mx' },
+      { page: 6, img: 'assets/img/mag-p6.png', title: 'Página 6 · Caballero, Kits & Directorio GDL' }
+    ];
+
+    const SPREADS = [
+      { label: 'Portada', indicator: 'Portada · Página 1 de 6', caption: 'The Olfactory Journal · Edición 2026 — Haz clic en la portada para abrir la revista' },
+      { label: 'Págs 2–3', indicator: 'Doble Página · Páginas 2 y 3 de 6', caption: 'Aromatizantes de Espacio: Condesa, Imperial, Majestad y Oceanic' },
+      { label: 'Págs 4–5', indicator: 'Doble Página · Páginas 4 y 5 de 6', caption: 'Bundle Hotel de Lujo ($799) & Alta Perfumería Dama y Árabe (@aromea.mx)' },
+      { label: 'Pág 6', indicator: 'Contraportada · Página 6 de 6', caption: 'Caballero, Kits de Regalo & Directorio Guadalajara' }
+    ];
+
+    let isSingleMode = window.innerWidth <= 680;
+    let currentIndex = 0;
+    let builtMode = null;
+
+    function buildBook() {
+      const arena = document.getElementById('standalone-book-arena');
+      builtMode = isSingleMode ? 'single' : 'spread';
+
+      if (!isSingleMode) {
+        const sheets = [
+          { front: PAGES[0], back: PAGES[1] },
+          { front: PAGES[2], back: PAGES[3] },
+          { front: PAGES[4], back: PAGES[5] }
+        ];
+        arena.innerHTML = `
+          <div class="book-3d closed-front" id="book-3d">
+            <div class="spine-glow"></div>
+            ${sheets.map((sh, idx) => `
+              <div class="sheet-leaf" data-idx="${idx}" style="z-index:${10 - idx};">
+                <div class="sheet-face face-front" data-dir="next" title="Haz clic o arrastra para pasar página">
+                  <img src="${sh.front.img}" alt="Página ${sh.front.page}" draggable="false" />
+                  <div class="turn-sheen"></div>
+                  <span class="corner-peel peel-right">Pág ${sh.front.page} · Pasar ↻</span>
+                </div>
+                <div class="sheet-face face-back" data-dir="prev" title="Haz clic o arrastra para regresar">
+                  <img src="${sh.back.img}" alt="Página ${sh.back.page}" draggable="false" />
+                  <div class="turn-sheen"></div>
+                  <span class="corner-peel peel-left">↺ Volver · Pág ${sh.back.page}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        arena.innerHTML = `
+          <div class="book-3d single-3d" id="book-3d">
+            ${PAGES.map((pg, idx) => `
+              <div class="sheet-leaf" data-idx="${idx}" style="z-index:${20 - idx};">
+                <div class="sheet-face face-front" data-dir="next" title="Toca o desliza para pasar de página">
+                  <img src="${pg.img}" alt="Página ${pg.page}" draggable="false" />
+                  <div class="turn-sheen"></div>
+                  <span class="corner-peel peel-right">Pág ${pg.page}/6 · Pasar ↻</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      bindDragAndClick();
+    }
+
+    function bindDragAndClick() {
+      const book = document.getElementById('book-3d');
+      if (!book) return;
+
+      let startX = null;
+      let activeLeaf = null;
+      let dir = null;
+      let dragging = false;
+
+      book.addEventListener('pointerdown', e => {
+        const face = e.target.closest('.sheet-face');
+        if (!face) return;
+        startX = e.clientX;
+        dragging = false;
+        dir = face.getAttribute('data-dir');
+        activeLeaf = face.closest('.sheet-leaf');
+      });
+
+      window.addEventListener('pointermove', e => {
+        if (startX === null || !activeLeaf) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 8) {
+          dragging = true;
+          activeLeaf.classList.add('is-dragging', 'is-turning');
+          activeLeaf.style.transition = 'none';
+          activeLeaf.style.zIndex = '35';
+
+          const rect = book.getBoundingClientRect();
+          const halfW = Math.max(150, rect.width * (isSingleMode ? 0.85 : 0.5));
+
+          if (!isSingleMode) {
+            if (dir === 'next') {
+              const p = Math.max(0, Math.min(1, -dx / halfW));
+              activeLeaf.style.transform = `rotateY(${-p * 180}deg)`;
+            } else {
+              const p = Math.max(0, Math.min(1, dx / halfW));
+              activeLeaf.style.transform = `rotateY(${-180 + p * 180}deg)`;
+            }
+          } else if (dx < 0 && currentIndex < PAGES.length - 1) {
+            const p = Math.max(0, Math.min(1, -dx / halfW));
+            activeLeaf.style.transform = `rotateY(${-p * 125}deg)`;
+          }
+        }
+      });
+
+      window.addEventListener('pointerup', e => {
+        if (startX === null) return;
+        const dx = e.clientX - startX;
+
+        if (activeLeaf) {
+          activeLeaf.style.transition = '';
+          activeLeaf.style.transform = '';
+          activeLeaf.classList.remove('is-dragging');
+        }
+
+        if (dragging) {
+          if (dx < -35) goToIndex(currentIndex + 1);
+          else if (dx > 35) goToIndex(currentIndex - 1);
+          else updateFlipbook();
+        } else if (activeLeaf) {
+          if (dir === 'next') goToIndex(currentIndex + 1);
+          else goToIndex(currentIndex - 1);
+        }
+
+        startX = null;
+        activeLeaf = null;
+        dragging = false;
+      });
+    }
+
+    function goToIndex(idx) {
+      const list = isSingleMode ? PAGES : SPREADS;
+      if (idx < 0) idx = 0;
+      if (idx >= list.length) idx = 0;
+      currentIndex = idx;
+      updateFlipbook();
+    }
+
+    function updateFlipbook() {
+      const targetMode = isSingleMode ? 'single' : 'spread';
+      if (builtMode !== targetMode) buildBook();
+
+      const list = isSingleMode ? PAGES : SPREADS;
+      if (currentIndex >= list.length) currentIndex = 0;
+      if (currentIndex < 0) currentIndex = list.length - 1;
+
+      const book = document.getElementById('book-3d');
+      const leaves = book ? book.querySelectorAll('.sheet-leaf') : [];
+      const indicator = document.getElementById('standalone-indicator');
+      const caption = document.getElementById('standalone-caption');
+      const modeBtn = document.getElementById('toggle-single-spread-btn');
+
+      if (!isSingleMode) {
+        const curr = SPREADS[currentIndex];
+        indicator.textContent = curr.indicator;
+        caption.textContent = curr.caption;
+        modeBtn.textContent = '📄 Vista 1 Página';
+
+        book.classList.toggle('closed-front', currentIndex === 0);
+        book.classList.toggle('open-spread', currentIndex === 1 || currentIndex === 2);
+        book.classList.toggle('closed-back', currentIndex === 3);
+
+        leaves.forEach((leaf, idx) => {
+          const wasFlipped = leaf.classList.contains('is-flipped');
+          const shouldFlip = idx < currentIndex;
+          if (wasFlipped !== shouldFlip) {
+            leaf.classList.add('is-turning');
+            leaf.style.zIndex = '30';
+            setTimeout(() => {
+              leaf.classList.remove('is-turning');
+              leaf.style.zIndex = shouldFlip ? String(10 + idx) : String(10 - idx);
+            }, 880);
+          } else {
+            leaf.style.zIndex = shouldFlip ? String(10 + idx) : String(10 - idx);
+          }
+          leaf.classList.toggle('is-flipped', shouldFlip);
+        });
+      } else {
+        const curr = PAGES[currentIndex];
+        indicator.textContent = `Página ${curr.page} de 6`;
+        caption.textContent = curr.title;
+        modeBtn.textContent = '📖 Vista Doble Página';
+
+        leaves.forEach((leaf, idx) => {
+          leaf.classList.toggle('is-flipped', idx < currentIndex);
+          leaf.style.zIndex = String(20 - idx);
+        });
+      }
+
+      const thumbsBar = document.getElementById('standalone-thumbs-bar');
+      thumbsBar.innerHTML = list.map((item, idx) => {
+        const label = isSingleMode ? `Pág ${item.page}` : item.label;
+        return `<button type="button" class="thumb-pill ${idx === currentIndex ? 'active' : ''}" data-idx="${idx}">${label}</button>`;
+      }).join('');
+
+      thumbsBar.querySelectorAll('[data-idx]').forEach(btn => {
+        btn.addEventListener('click', () => goToIndex(Number(btn.getAttribute('data-idx'))));
+      });
+    }
+
+    document.getElementById('standalone-prev-btn').addEventListener('click', () => goToIndex(currentIndex - 1));
+    document.getElementById('standalone-next-btn').addEventListener('click', () => goToIndex(currentIndex + 1));
+
+    document.getElementById('toggle-single-spread-btn').addEventListener('click', () => {
+      document.body.classList.remove('continuous-mode');
+      isSingleMode = !isSingleMode;
+      currentIndex = 0;
+      updateFlipbook();
+    });
+
+    document.getElementById('toggle-continuous-btn').addEventListener('click', e => {
+      const isCont = document.body.classList.toggle('continuous-mode');
+      e.currentTarget.textContent = isCont ? '📖 Volver a Flipbook 3D' : '📜 Vista Continua';
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') goToIndex(currentIndex + 1);
+      if (e.key === 'ArrowLeft') goToIndex(currentIndex - 1);
+    });
+
+    updateFlipbook();
+  </script>
 </body>
 </html>
